@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -42,15 +43,19 @@ class MainActivity : AppCompatActivity() {
         appComponent.inject(this)
         edit_text_search_user.setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                endpoints.searchUsers("CoderJava")
+                showLoading()
+                endpoints.searchUsers(edit_text_search_user.text.toString().trim())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                         {
+                            hideLoading()
                             val jsonResponse = JSONObject(it.string())
                             Log.d(TAG, "jsonResponse: $jsonResponse")
+                            text_view_result.text = jsonResponse.toString()
                         },
                         {
+                            hideLoading()
                             it.printStackTrace()
                         },
                         {
@@ -60,6 +65,16 @@ class MainActivity : AppCompatActivity() {
             }
             false
         }
+    }
+
+    private fun hideLoading() {
+        progress_bar_activity_main.visibility = View.GONE
+        text_view_result.visibility = View.VISIBLE
+    }
+
+    private fun showLoading() {
+        progress_bar_activity_main.visibility = View.VISIBLE
+        text_view_result.visibility = View.GONE
     }
 
     private fun checkPermission() {
