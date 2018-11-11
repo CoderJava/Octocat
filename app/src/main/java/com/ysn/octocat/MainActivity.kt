@@ -13,55 +13,57 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.ysn.octocat.api.Endpoints
-import com.ysn.octocat.di.AppComponent
-import com.ysn.octocat.di.DaggerAppComponent
-import com.ysn.octocat.di.OkHttpModule
-import com.ysn.octocat.di.RetrofitModule
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
-import javax.inject.Inject
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
     private val TAG = javaClass.simpleName
-    lateinit var appComponent: AppComponent
-
-    @Inject
-    lateinit var endpoints: Endpoints
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         checkPermission()
 
-        appComponent = DaggerAppComponent.builder()
-            .okHttpModule(OkHttpModule())
-            .retrofitModule(RetrofitModule())
-            .build()
-        appComponent.inject(this)
+        val okhttpClient = OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
+                .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .build()
+        val endpoints = Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .client(okhttpClient)
+                .build()
+                .create(Endpoints::class.java)
         edit_text_search_user.setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 showLoading()
                 endpoints.searchUsers(edit_text_search_user.text.toString().trim())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            hideLoading()
-                            val jsonResponse = JSONObject(it.string())
-                            Log.d(TAG, "jsonResponse: $jsonResponse")
-                            text_view_result.text = jsonResponse.toString()
-                        },
-                        {
-                            hideLoading()
-                            it.printStackTrace()
-                        },
-                        {
-                            /* nothing to do in here */
-                        }
-                    )
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                {
+                                    hideLoading()
+                                    val jsonResponse = JSONObject(it.string())
+                                    Log.d(TAG, "jsonResponse: $jsonResponse")
+                                    text_view_result.text = jsonResponse.toString()
+                                },
+                                {
+                                    hideLoading()
+                                    it.printStackTrace()
+                                },
+                                {
+                                    /* nothing to do in here */
+                                }
+                        )
             }
             false
         }
