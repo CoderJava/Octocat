@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Octocat</string>
+    <string name="input_username">Input username</string>
+</resources>
