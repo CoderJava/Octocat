@@ -1,10 +1,9 @@
 package com.ysn.octocat
 
 import android.Manifest
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -21,11 +20,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     private val TAG = javaClass.simpleName
     lateinit var appComponent: AppComponent
+
+    @Inject
     lateinit var endpoints: Endpoints
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             .okHttpModule(OkHttpModule())
             .retrofitModule(RetrofitModule())
             .build()
-        endpoints = appComponent.getEndpoints()
+        appComponent.inject(this)
         edit_text_search_user.setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 endpoints.searchUsers("CoderJava")

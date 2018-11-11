@@ -1,6 +1,6 @@
 package com.ysn.octocat.di
 
-import com.ysn.octocat.api.Endpoints
+import com.ysn.octocat.MainActivity
 import dagger.Component
 import javax.inject.Singleton
 
@@ -8,6 +8,6 @@ import javax.inject.Singleton
 @Singleton
 interface AppComponent {
 
-    fun getEndpoints(): Endpoints
+    fun inject(mainActivity: MainActivity)
 
 }
