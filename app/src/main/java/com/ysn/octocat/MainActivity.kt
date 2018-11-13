@@ -13,10 +13,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.ysn.octocat.api.Endpoints
-import com.ysn.octocat.di.AppComponent
-import com.ysn.octocat.di.DaggerAppComponent
-import com.ysn.octocat.di.OkHttpModule
-import com.ysn.octocat.di.RetrofitModule
+import com.ysn.octocat.di.Fitur
+import dagger.android.AndroidInjection
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -26,24 +24,23 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private val TAG = javaClass.simpleName
-    lateinit var appComponent: AppComponent
 
     @Inject
     lateinit var endpoints: Endpoints
 
+    @Inject
+    lateinit var fitur: Fitur
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         checkPermission()
 
-        appComponent = DaggerAppComponent.builder()
-            .okHttpModule(OkHttpModule())
-            .retrofitModule(RetrofitModule())
-            .build()
-        appComponent.inject(this)
         edit_text_search_user.setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 showLoading()
+                fitur.printOut()
                 endpoints.searchUsers(edit_text_search_user.text.toString().trim())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -59,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                             it.printStackTrace()
                         },
                         {
-                            /* nothing to do in here */
+
                         }
                     )
             }

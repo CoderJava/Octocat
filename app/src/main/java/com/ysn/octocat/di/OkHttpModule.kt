@@ -10,6 +10,7 @@ import javax.inject.Singleton
 class OkHttpModule {
 
     @Provides
+    @Singleton
     fun provideOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .retryOnConnectionFailure(true)
