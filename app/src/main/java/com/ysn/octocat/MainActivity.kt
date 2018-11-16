@@ -14,6 +14,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.ysn.octocat.api.Endpoints
 import com.ysn.octocat.di.Fitur
+import com.ysn.octocat.di.FiturMainActivity2
 import dagger.android.AndroidInjection
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -31,6 +32,12 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var fitur: Fitur
 
+    @Inject
+    lateinit var fiturMainActivity: FiturMainActivity
+
+    @Inject
+    lateinit var fiturMainActivity2: FiturMainActivity2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
@@ -41,6 +48,8 @@ class MainActivity : AppCompatActivity() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 showLoading()
                 fitur.printOut()
+                fiturMainActivity.printOut()
+                fiturMainActivity2.printOut()
                 endpoints.searchUsers(edit_text_search_user.text.toString().trim())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
